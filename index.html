@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>StreamX OTT - Smart TV</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- HLS.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+
+  <!-- ================= AUTH SCREEN ================= -->
+  <div id="authScreen" class="overlay-screen">
+    <div class="auth-card">
+      <div class="brand-header">
+        <h1 class="logo">Stream<span>X</span></h1>
+        <p class="tagline">Premium Live TV Experience</p>
+      </div>
+      
+      <div class="auth-tabs">
+        <button id="tabLoginBtn" class="tab-btn focusable active" tabindex="0" onclick="switchAuthTab('login')">Login</button>
+        <button id="tabRegisterBtn" class="tab-btn focusable" tabindex="0" onclick="switchAuthTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="input-group">
+          <input type="tel" id="loginPhone" class="focusable" placeholder="Phone Number" required tabindex="0">
+        </div>
+        <div class="input-group">
+          <input type="password" id="loginPassword" class="focusable" placeholder="Password" required tabindex="0">
+        </div>
+        <button type="submit" id="loginSubmitBtn" class="btn-primary focusable" tabindex="0">Login</button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
+        <div class="input-group">
+          <input type="text" id="regName" class="focusable" placeholder="Full Name" required tabindex="0">
+        </div>
+        <div class="input-group">
+          <input type="tel" id="regPhone" class="focusable" placeholder="Phone Number" required tabindex="0">
+        </div>
+        <div class="input-group">
+          <input type="password" id="regPassword" class="focusable" placeholder="Password (Min. 6 chars)" required tabindex="0">
+        </div>
+        <button type="submit" id="regSubmitBtn" class="btn-primary focusable" tabindex="0">Create Account</button>
+      </form>
+
+      <p id="authMessage" class="msg-box"></p>
+    </div>
+  </div>
+
+  <!-- ================= SUBSCRIPTION SCREEN ================= -->
+  <div id="subScreen" class="overlay-screen" style="display: none;">
+    <div class="sub-card">
+      <div class="sub-header">
+        <h2>Subscription Required</h2>
+        <p>Subscribe to access live TV channels</p>
+      </div>
+      
+      <div id="packageList" class="package-list">
+        <!-- Dynamic Packages -->
+      </div>
+
+      <div id="paymentFormBox" class="payment-box" style="display: none;">
+        <h3 id="selectedPkgText" class="pkg-title"></h3>
+        
+        <div class="qr-box">
+          <p class="qr-desc">Scan the bKash QR code or use the payment number to subscribe:</p>
+          <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg06gZyTA-e5Oadc95UJ3gmgFy6nzIpVkWYNdhAvmaJ437hfCvFkMX4FMJp3rwFBYBt9Bj7x7cvbO1Hv5vbDh9GcoWVXltwxUlW9QL7cchFzImw4m35fnc2FP0Pr9lqk-zb_uhpwP3bNBokVTs6-cK02FhI6Rm5xVqayNY5b1CfLk5wM3yXy8IArzDVO0oV/s780/1000094124.png" alt="Payment QR" class="qr-img">
+        </div>
+
+        <div class="input-group">
+          <input type="text" id="trxIdInput" class="focusable" placeholder="Transaction ID (TrxID)" required tabindex="0">
+        </div>
+        <button onclick="submitPaymentRequest()" class="btn-primary focusable" tabindex="0">Submit Payment</button>
+        <button onclick="cancelPaymentSelect()" class="btn-secondary focusable" tabindex="0">Cancel</button>
+      </div>
+
+      <p id="subMessage" class="msg-box"></p>
+      <button class="btn-outline focusable" onclick="handleLogout()" tabindex="0">Logout</button>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP SCREEN ================= -->
+  <div id="mainApp" style="display: none;">
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo">Stream<span>X</span></div>
+        <span class="live-indicator"><span class="dot"></span> LIVE</span>
+      </div>
+      <div class="header-right">
+        <span id="userBadge" class="badge-active">ACTIVE</span>
+        <button onclick="handleLogout()" class="btn-sm focusable" tabindex="0">Logout</button>
+      </div>
+    </header>
+
+    <nav class="categories-bar">
+      <button class="cat-btn focusable active" tabindex="0" onclick="selectCategory('sports', this)">Sports</button>
+      <button class="cat-btn focusable" tabindex="0" onclick="selectCategory('news', this)">News</button>
+      <button class="cat-btn focusable" tabindex="0" onclick="selectCategory('bangla', this)">Bangla</button>
+      <button class="cat-btn focusable" tabindex="0" onclick="selectCategory('drama', this)">Drama</button>
+    </nav>
+
+    <main class="app-viewport">
+      <!-- Player Section -->
+      <section class="player-wrapper">
+        <div class="player-container">
+          <video id="player" class="focusable" controls playsinline tabindex="0"></video>
+          <div id="playerLoader" class="player-overlay-loader" style="display: none;">
+            <div class="spinner"></div>
+          </div>
+        </div>
+        <div class="stream-status-bar">
+          <div class="status-info">
+            <span id="status">Select a channel to play</span>
+          </div>
+          <button id="manualRefreshBtn" class="btn-refresh focusable" tabindex="0" onclick="forceReloadCurrentStream()">
+            <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Channel Grid Section -->
+      <section class="channels-wrapper">
+        <div class="section-title">Available Channels</div>
+        <div class="channel-grid" id="channelList">
+          <!-- Dynamic Channels -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+        </html>
