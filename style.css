@@ -28,11 +28,7 @@ body {
 }
 
 /* Hide Mouse Cursor when operating in TV D-pad mode */
-body.tv-dpad-mode {
-  cursor: none !important;
-}
-
-body.tv-dpad-mode * {
+body.tv-dpad-mode, body.tv-dpad-mode * {
   cursor: none !important;
 }
 
@@ -46,13 +42,13 @@ body.tv-dpad-mode * {
 .package-card:focus,
 input:focus,
 button:focus {
-  outline: 3px solid var(--focus-glow) !important;
-  outline-offset: 3px !important;
+  outline: 4px solid var(--focus-glow) !important;
+  outline-offset: 2px !important;
   border-color: var(--focus-glow) !important;
-  box-shadow: 0 0 20px rgba(56, 239, 125, 0.7) !important;
-  transform: scale(1.05) !important;
-  z-index: 50 !important;
-  transition: all 0.15s ease-in-out;
+  box-shadow: 0 0 25px rgba(56, 239, 125, 0.9) !important;
+  transform: scale(1.08) !important;
+  z-index: 99 !important;
+  transition: all 0.12s ease-in-out;
 }
 
 /* OVERLAY SCREENS */
@@ -477,4 +473,4 @@ video {
   .channel-grid {
     grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
   }
-}
+  }
