@@ -49,7 +49,6 @@ let stallTimeoutTimer = null;
 let lastPlayedTime = 0;
 let stallCheckInterval = null;
 
-// Format phone into synthetic email
 function phoneToEmail(phone) {
   const clean = phone.replace(/[^0-9]/g, '');
   return `${clean}@streamx.com`;
@@ -81,7 +80,7 @@ function stopVideoPlayer() {
   hidePlayerLoader();
 }
 
-// ==================== ANDROID TV D-PAD SPATIAL NAVIGATION ENGINE ====================
+// ==================== ADVANCED ANDROID TV REMOTE D-PAD NAVIGATION ENGINE ====================
 function getVisibleFocusables() {
   const activeContainer = document.getElementById("mainApp").style.display !== "none" 
     ? document.getElementById("mainApp") 
@@ -93,7 +92,7 @@ function getVisibleFocusables() {
     .filter(el => el.offsetWidth > 0 && el.offsetHeight > 0 && window.getComputedStyle(el).visibility !== 'hidden');
 }
 
-function navigateDPad(direction) {
+function navigateDPad(directionCode) {
   document.body.classList.add("tv-dpad-mode");
 
   const focusables = getVisibleFocusables();
@@ -114,6 +113,7 @@ function navigateDPad(direction) {
   let bestCandidate = null;
   let minDistance = Infinity;
 
+  // Keycodes: 38 Up, 40 Down, 37 Left, 39 Right
   focusables.forEach(el => {
     if (el === current) return;
     const rect = el.getBoundingClientRect();
@@ -123,15 +123,22 @@ function navigateDPad(direction) {
     };
 
     let isValidDirection = false;
-    if (direction === 'ArrowUp' && center.y < currentCenter.y - 5) isValidDirection = true;
-    if (direction === 'ArrowDown' && center.y > currentCenter.y + 5) isValidDirection = true;
-    if (direction === 'ArrowLeft' && center.x < currentCenter.x - 5) isValidDirection = true;
-    if (direction === 'ArrowRight' && center.x > currentCenter.x + 5) isValidDirection = true;
+    if (directionCode === 38 && center.y < currentCenter.y - 10) isValidDirection = true; // UP
+    if (directionCode === 40 && center.y > currentCenter.y + 10) isValidDirection = true; // DOWN
+    if (directionCode === 37 && center.x < currentCenter.x - 10) isValidDirection = true; // LEFT
+    if (directionCode === 39 && center.x > currentCenter.x + 10) isValidDirection = true; // RIGHT
 
     if (isValidDirection) {
-      const dist = Math.hypot(center.x - currentCenter.x, center.y - currentCenter.y);
-      if (dist < minDistance) {
-        minDistance = dist;
+      const dx = Math.abs(center.x - currentCenter.x);
+      const dy = Math.abs(center.y - currentCenter.y);
+      
+      // Penalize orthogonal distance to favor straight grid movement
+      let weightedDist = (directionCode === 38 || directionCode === 40) 
+        ? dy + (dx * 2.5) 
+        : dx + (dy * 2.5);
+
+      if (weightedDist < minDistance) {
+        minDistance = weightedDist;
         bestCandidate = el;
       }
     }
@@ -139,27 +146,43 @@ function navigateDPad(direction) {
 
   if (bestCandidate) {
     bestCandidate.focus();
-    bestCandidate.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    bestCandidate.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
   }
 }
 
-// Keydown Listener for Android TV Remote D-pad
+// Keydown Listener for Android TV Remote D-Pad & Physical TV KeyCodes
 document.addEventListener('keydown', (e) => {
-  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+  const code = e.keyCode || e.which;
+
+  // Directional Navigation (Up: 38, Down: 40, Left: 37, Right: 39)
+  if ([37, 38, 39, 40].includes(code) || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
     e.preventDefault();
-    navigateDPad(e.key);
-  } else if (e.key === 'Enter') {
+    let dirCode = code;
+    if (e.key === 'ArrowUp') dirCode = 38;
+    if (e.key === 'ArrowDown') dirCode = 40;
+    if (e.key === 'ArrowLeft') dirCode = 37;
+    if (e.key === 'ArrowRight') dirCode = 39;
+
+    navigateDPad(dirCode);
+  } 
+  // OK / Enter Button (Keycode 13)
+  else if (code === 13 || e.key === 'Enter') {
     if (document.activeElement && typeof document.activeElement.click === 'function') {
       document.activeElement.click();
     }
-  } else if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack') {
-    // Return focus to Category Bar if pressing Back from Channels/Player
-    const firstCat = document.querySelector('.cat-btn');
-    if (firstCat) firstCat.focus();
+  } 
+  // Back Button (Keycode 8, 27, 461, 10009 - TV Back Keycodes)
+  else if ([8, 27, 461, 10009].includes(code) || e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack') {
+    const activeCat = document.querySelector('.cat-btn.active') || document.querySelector('.cat-btn');
+    if (activeCat && document.activeElement !== activeCat) {
+      e.preventDefault();
+      activeCat.focus();
+      activeCat.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 });
 
-// Show Mouse Cursor if mouse is moved
+// Show Mouse Cursor if mouse is explicitly moved
 document.addEventListener('mousemove', () => {
   document.body.classList.remove("tv-dpad-mode");
 });
@@ -177,11 +200,13 @@ window.switchAuthTab = function(tab) {
     regForm.style.display = "none";
     tabLogin.classList.add("active");
     tabReg.classList.remove("active");
+    setTimeout(() => document.getElementById("loginPhone").focus(), 100);
   } else {
     loginForm.style.display = "none";
     regForm.style.display = "block";
     tabReg.classList.add("active");
     tabLogin.classList.remove("active");
+    setTimeout(() => document.getElementById("regName").focus(), 100);
   }
 };
 
@@ -282,12 +307,6 @@ onAuthStateChanged(auth, (user) => {
 
         loadChannels(currentCategory);
 
-        // Auto-focus first category for TV remote on login
-        setTimeout(() => {
-          const activeCat = document.querySelector('.cat-btn.active');
-          if (activeCat) activeCat.focus();
-        }, 500);
-
         if (expiryCheckInterval) clearInterval(expiryCheckInterval);
         expiryCheckInterval = setInterval(() => {
           if (Date.now() >= sub.expiry) {
@@ -308,6 +327,10 @@ onAuthStateChanged(auth, (user) => {
     authScreen.style.display = "flex";
     subScreen.style.display = "none";
     mainApp.style.display = "none";
+    setTimeout(() => {
+      const loginInput = document.getElementById("loginPhone");
+      if (loginInput) loginInput.focus();
+    }, 200);
   }
 });
 
@@ -333,21 +356,30 @@ function loadPackages() {
       return;
     }
 
+    let firstPkg = null;
     snapshot.forEach((docSnap) => {
       const pkg = docSnap.data();
       const id = docSnap.id;
       if (pkg.active !== false) {
-        pkgList.innerHTML += `
-          <div class="package-card focusable" tabindex="0" onclick="selectPackage('${id}', '${pkg.name}', ${pkg.price}, ${pkg.durationDays})">
-            <div class="package-info">
-              <h4>${pkg.name}</h4>
-              <p>Duration: ${pkg.durationDays} Days</p>
-            </div>
-            <div class="package-price">৳${pkg.price}</div>
+        const card = document.createElement('div');
+        card.className = "package-card focusable";
+        card.tabIndex = 0;
+        card.innerHTML = `
+          <div class="package-info">
+            <h4>${pkg.name}</h4>
+            <p>Duration: ${pkg.durationDays} Days</p>
           </div>
+          <div class="package-price">৳${pkg.price}</div>
         `;
+        card.onclick = () => selectPackage(id, pkg.name, pkg.price, pkg.durationDays);
+        pkgList.appendChild(card);
+        if (!firstPkg) firstPkg = card;
       }
     });
+
+    if (firstPkg) {
+      setTimeout(() => firstPkg.focus(), 200);
+    }
   });
 }
 
@@ -355,6 +387,10 @@ window.selectPackage = function(id, name, price, days) {
   selectedPackage = { id, name, price, days };
   document.getElementById("selectedPkgText").innerText = `Package: ${name} (৳${price} - ${days} Days)`;
   document.getElementById("paymentFormBox").style.display = "block";
+  setTimeout(() => {
+    const trx = document.getElementById("trxIdInput");
+    if (trx) trx.focus();
+  }, 100);
 };
 
 window.cancelPaymentSelect = function() {
@@ -416,6 +452,8 @@ function loadChannels(category) {
     }
 
     let count = 0;
+    let firstChannelCard = null;
+
     snapshot.forEach((docSnap) => {
       const ch = docSnap.data();
       if (ch.active !== false) {
@@ -429,10 +467,20 @@ function loadChannels(category) {
         `;
         div.onclick = () => playChannel(ch, div);
         list.appendChild(div);
+
+        if (!firstChannelCard) firstChannelCard = div;
       }
     });
 
     status.innerText = `${category.toUpperCase()} • ${count} Channels`;
+
+    // Automatically focus the first channel for TV Remote
+    if (firstChannelCard) {
+      setTimeout(() => {
+        document.body.classList.add("tv-dpad-mode");
+        firstChannelCard.focus();
+      }, 150);
+    }
   });
 }
 
