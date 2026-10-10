@@ -5,16 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>StreamX OTT - Smart TV</title>
   <link rel="stylesheet" href="style.css">
-  <!-- HLS.js Library -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <!-- App Icon / Favicon -->
   <link rel="icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhOEv2Ig591hAKO-gsmQbokKziKFlU0djwYADG7pZ58biaGdhJq3IJ9M6Q3BfI0ChrHUtXM6Tv3THF7ipVdNL4W1cjcQbG5g2pMRK50cVsiyZE4xTJt2Gomam-mmg29X6lZjtfyLTQq485i6Kn2M2gUYSq7QxMxIVsKuFVWX84SafPx-a4WR5AgtmMem03Y/s1254/1000094174.png" type="image/png">
-  <!-- Manifest File Link -->
   <link rel="manifest" href="manifest.json">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7349899618799245"
-     crossorigin="anonymous"></script>
-  <meta name="google-adsense-account" content="ca-pub-7349899618799245">
-     
 </head>
 <body class="tv-dpad-mode">
 
@@ -65,7 +58,7 @@
     <div class="sub-card">
       <div class="sub-header">
         <h2>Subscription Required</h2>
-        <p>Subscribe to access live TV channels</p>
+        <p>Subscribe to access live TV service</p>
       </div>
       
       <div id="packageList" class="package-list">
@@ -92,7 +85,7 @@
     </div>
   </div>
 
-  <!-- ================= MAIN APP SCREEN ================= -->
+  <!-- ================= MAIN APP SCREEN (DIRECT STREAM LINK CONTAINER) ================= -->
   <div id="mainApp" style="display: none;">
     <header class="app-header">
       <div class="header-left">
@@ -105,43 +98,8 @@
       </div>
     </header>
 
-    <nav class="categories-bar">
-      <button class="cat-btn focusable active" tabindex="0" onclick="selectCategory('sports', this)">Sports</button>
-      <button class="cat-btn focusable" tabindex="0" onclick="selectCategory('news', this)">News</button>
-      <button class="cat-btn focusable" tabindex="0" onclick="selectCategory('bangla', this)">Bangla</button>
-      <button class="cat-btn focusable" tabindex="0" onclick="selectCategory('cartoon', this)">Cartoon</button>
-      <button class="cat-btn focusable" tabindex="0" onclick="selectCategory('drama', this)">Drama</button>
-    </nav>
-
     <main class="app-viewport">
-      <!-- Player Section -->
-      <section class="player-wrapper">
-        <div class="player-container">
-          <video id="player" class="focusable" controls playsinline tabindex="0"></video>
-          <div id="playerLoader" class="player-overlay-loader" style="display: none;">
-            <div class="spinner"></div>
-          </div>
-        </div>
-        <div class="stream-status-bar">
-          <div class="status-info">
-            <span id="status">Select a channel to play</span>
-          </div>
-          <button id="manualRefreshBtn" class="btn-refresh focusable" tabindex="0" onclick="forceReloadCurrentStream()">
-            <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-            </svg>
-            <span>Refresh</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- Channel Grid Section -->
-      <section class="channels-wrapper">
-        <div class="section-title">Available Channels</div>
-        <div class="channel-grid" id="channelList">
-          <!-- Dynamic Channels -->
-        </div>
-      </section>
+      <iframe id="streamFrame" class="stream-iframe" allowfullscreen></iframe>
     </main>
   </div>
 
