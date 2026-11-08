@@ -1,122 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>StreamX OTT - Smart TV</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- App Icon / Favicon -->
-  <link rel="icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhOEv2Ig591hAKO-gsmQbokKziKFlU0djwYADG7pZ58biaGdhJq3IJ9M6Q3BfI0ChrHUtXM6Tv3THF7ipVdNL4W1cjcQbG5g2pMRK50cVsiyZE4xTJt2Gomam-mmg29X6lZjtfyLTQq485i6Kn2M2gUYSq7QxMxIVsKuFVWX84SafPx-a4WR5AgtmMem03Y/s1254/1000094174.png" type="image/png">
-  <link rel="manifest" href="manifest.json">
-  <meta name="739e7117a06d8dda3504653812f3d482af835e8b" content="739e7117a06d8dda3504653812f3d482af835e8b" />
-  <meta name="referrer" content="no-referrer-when-downgrade" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adzentra Ads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body class="tv-dpad-mode">
-
-  <!-- ================= AUTH SCREEN ================= -->
-  <div id="authScreen" class="overlay-screen">
-    <div class="auth-card">
-      <div class="brand-header">
-        <h1 class="logo">Stream<span>X</span></h1>
-        <p class="tagline">Premium Live TV Experience</p>
-      </div>
-      
-      <div class="auth-tabs">
-        <button id="tabLoginBtn" class="tab-btn focusable active" tabindex="0" onclick="switchAuthTab('login')">Login</button>
-        <button id="tabRegisterBtn" class="tab-btn focusable" tabindex="0" onclick="switchAuthTab('register')">Register</button>
-      </div>
-
-      <!-- Login Form -->
-      <form id="loginForm" onsubmit="handleLogin(event)">
-        <div class="input-group">
-          <input type="tel" id="loginPhone" class="focusable" placeholder="Phone Number" required tabindex="0">
-        </div>
-        <div class="input-group">
-          <input type="password" id="loginPassword" class="focusable" placeholder="Password" required tabindex="0">
-        </div>
-        <button type="submit" id="loginSubmitBtn" class="btn-primary focusable" tabindex="0">Login</button>
-      </form>
-
-      <!-- Register Form -->
-      <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
-        <div class="input-group">
-          <input type="text" id="regName" class="focusable" placeholder="Full Name" required tabindex="0">
-        </div>
-        <div class="input-group">
-          <input type="tel" id="regPhone" class="focusable" placeholder="Phone Number" required tabindex="0">
-        </div>
-        <div class="input-group">
-          <input type="password" id="regPassword" class="focusable" placeholder="Password (Min. 6 chars)" required tabindex="0">
-        </div>
-        <button type="submit" id="regSubmitBtn" class="btn-primary focusable" tabindex="0">Create Account</button>
-      </form>
-
-      <p id="authMessage" class="msg-box"></p>
-    </div>
-  </div>
-
-  <!-- ================= SUBSCRIPTION SCREEN ================= -->
-  <div id="subScreen" class="overlay-screen" style="display: none;">
-    <div class="sub-card">
-      <div class="sub-header">
-        <h2>Subscription Required</h2>
-        <p>Subscribe to access live TV service</p>
-      </div>
-      
-      <div id="packageList" class="package-list">
-        <!-- Dynamic Packages -->
-      </div>
-
-      <div id="paymentFormBox" class="payment-box" style="display: none;">
-        <h3 id="selectedPkgText" class="pkg-title"></h3>
-        
-        <div class="qr-box">
-          <p class="qr-desc">Scan the bKash QR code or use the payment number to subscribe:</p>
-          <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg06gZyTA-e5Oadc95UJ3gmgFy6nzIpVkWYNdhAvmaJ437hfCvFkMX4FMJp3rwFBYBt9Bj7x7cvbO1Hv5vbDh9GcoWVXltwxUlW9QL7cchFzImw4m35fnc2FP0Pr9lqk-zb_uhpwP3bNBokVTs6-cK02FhI6Rm5xVqayNY5b1CfLk5wM3yXy8IArzDVO0oV/s780/1000094124.png" alt="Payment QR" class="qr-img">
-        </div>
-
-        <div class="input-group">
-          <input type="text" id="trxIdInput" class="focusable" placeholder="Transaction ID (TrxID)" required tabindex="0">
-        </div>
-        <button onclick="submitPaymentRequest()" class="btn-primary focusable" tabindex="0">Submit Payment</button>
-        <button onclick="cancelPaymentSelect()" class="btn-secondary focusable" tabindex="0">Cancel</button>
-      </div>
-
-      <p id="subMessage" class="msg-box"></p>
-      <button class="btn-outline focusable" onclick="handleLogout()" tabindex="0">Logout</button>
-    </div>
-  </div>
-
-  <!-- ================= MAIN APP SCREEN (DIRECT STREAM LINK CONTAINER) ================= -->
-  <div id="mainApp" style="display: none;">
-    <header class="app-header">
-      <div class="header-left">
-        <div class="logo">Stream<span>X</span></div>
-        <span class="live-indicator"><span class="dot"></span> LIVE</span>
-      </div>
-      <div class="header-right">
-        <span id="userBadge" class="badge-active">ACTIVE</span>
-        <button onclick="handleLogout()" class="btn-sm focusable" tabindex="0">Logout</button>
-      </div>
-    </header>
-
-    <main class="app-viewport">
-      <iframe id="streamFrame" class="stream-iframe" allowfullscreen></iframe>
-    </main>
-  </div>
-
-  <script type="module" src="script.js"></script>
-  <script>
-(function(nuo){
-var d = document,
-    s = d.createElement('script'),
-    l = d.currentScript || d.scripts[d.scripts.length - 1];
-s.settings = nuo || {};
-s.src = "\/\/prizefamily.com\/b_XfVjs.deG\/l\/0\/YLWScE\/devmR9kuRZ\/Ujl\/ktPvTHc\/1SMLjJcyz\/NRTDcut-NazMUmymNyzWM\/2yM-Qj";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-  </script>
+<body>
+<header class="top">
+  <button class="icon-btn" id="menuBtn" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <div class="brand">Adzentra<b>Ads</b></div>
+  <div class="sp"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch theme">◐</button>
+  <div class="avatar" id="avatar">A</div>
+</header>
+<div class="drawer" id="drawer">
+  <div class="veil" id="veil"></div>
+  <nav id="nav"></nav>
+</div>
+<main id="view"></main>
+<div class="sheet" id="sheet"><div id="sheetBody"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
