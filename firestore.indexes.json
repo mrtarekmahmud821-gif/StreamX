@@ -1,0 +1,7 @@
+{ "indexes": [
+  { "collectionGroup": "walletLedger", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "publisherId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "releaseAt", "order": "ASCENDING" } ] },
+  { "collectionGroup": "walletLedger", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "releaseAt", "order": "ASCENDING" } ] },
+  { "collectionGroup": "walletLedger", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "publisherId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" } ] },
+  { "collectionGroup": "withdrawals", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "publisherId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" } ] },
+  { "collectionGroup": "withdrawals", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "publisherId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" } ] }
+], "fieldOverrides": [] }
